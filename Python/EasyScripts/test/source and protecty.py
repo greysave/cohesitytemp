@@ -34,7 +34,7 @@ class CohesityUserAuthentication(object):
       return CohesityClient(self.cluster_ip, self.username, self.password, self.domain)
 
 class CreateVMProtectionJob(object):
-    def __init__(self):
+    def __init__(self, body):
         pass
     def check_protection_job_exists(self):
         pass
@@ -47,6 +47,9 @@ class CreateVMProtectionJob(object):
         for item in self.vm_list:
             vms.append(item)
         return vms
+    def protect_vms(self, cohesity_client, body):
+        protect_vms = cohesity_client.protection_jobs()
+        
         
     
 def main():
@@ -57,11 +60,11 @@ def main():
     #Get a list of VMs on the Cluster
     vm_list = CreateVMProtectionJob()
     for item in vm_list.get_vm_list(cohesity_client):
-        print(item.name)
+        if item.name == "LINUX_Client" or "WIN_Client" or "GATEWAY":
+            body.name == item.name
+    body.policy_id = policy_id
 
         
-
-
 
   
 
