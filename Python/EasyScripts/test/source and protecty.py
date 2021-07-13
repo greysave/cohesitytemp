@@ -6,6 +6,7 @@ from cohesity_management_sdk.models.environment_list_application_servers_enum im
 from cohesity_management_sdk.models.environment_list_protected_objects_enum import EnvironmentListProtectedObjectsEnum as envobj
 from cohesity_management_sdk.models.protection_job_request_body import ProtectionJobRequestBody as body
 from cohesity_management_sdk.models.environment_enum import EnvironmentEnum as env
+from cohesity_management_sdk.models.protection_job_request_body import ProtectionJobRequestBody as job_req
 import datetime
 #import os
 import getpass
@@ -34,7 +35,7 @@ class CohesityUserAuthentication(object):
       return CohesityClient(self.cluster_ip, self.username, self.password, self.domain)
 
 class CreateVMProtectionJob(object):
-    def __init__(self, body):
+    def __init__(self):
         pass
     def check_protection_job_exists(self):
         pass
@@ -48,7 +49,7 @@ class CreateVMProtectionJob(object):
             vms.append(item)
         return vms
     def protect_vms(self, cohesity_client, body):
-        protect_vms = cohesity_client.protection_jobs()
+        protect_vms = cohesity_client.protection_jobs
         
     
 def main():
@@ -56,16 +57,38 @@ def main():
     cohesity_client = CohesityUserAuthentication()
     cohesity_client = cohesity_client.user_auth()
     
+    
+    
     #Get a list of VMs on the Cluster
     vm_list = CreateVMProtectionJob()
-    for item in vm_list.get_vm_list(cohesity_client):
-        if item.name == "LINUX_Client" or "WIN_Client" or "GATEWAY":
-            body.name == item.name
+    id_list = []
     
+    for item in vm_list.get_vm_list(cohesity_client):
+        #Don't forget the parent source ID when you get vCD access
+        #print(item.name)
+        if item.name.__contains__("LINUX_Client") or item.name.__contains__("WIN_Client") or item.name.__contains__("GATEWAY"):
+            id_list.append(item.id)
+        #     print(item.name)
+        #     #body.name == item.name
+            #print("Protection job created for VM {item} has a source id of {id} and a parent source Id of {parent_id}".format(item = item.name, id = item.id, parent_id = item.parent_id))
+            
+        # 
+    #request = cohesity_client.protection_jobs.create_protection_job(body)
+    print(id_list)
+    body = job_req()
+    body.name = "Greg VM Test"
+    body.policy_id = "7307753125324436:1601671778819:3"
+    body.view_box_id = 21
+    body.environment = "kVMware"
+    body.parent_source_id = 8276
+    body.source_ids = id_list
+    body.timezone = 'America/New_York'
+    protect_job = cohesity_client.protection_jobs
+    protected_job = protect_job.create_protection_job(body) 
+       
 
         
 
-  
 
 if __name__ == '__main__':
     main()
