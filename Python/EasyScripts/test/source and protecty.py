@@ -48,7 +48,7 @@ class CreateVMProtectionJob(object):
         for item in self.vm_list:
             vms.append(item)
         return vms
-    def protect_vms(self, cohesity_client, body):
+    def protect_vms(self, cohesity_client):
         protect_vms = cohesity_client.protection_jobs
         
     

@@ -32,7 +32,7 @@ class CohesityUserAuthentication(object):
 #CSV Import Class
 class CsvImport(object):
     def __init__(self):
-        self.root = tk.tk()
+        self.root = tk.Tk()
         self.root.withdraw()
         self.file_path = filedialog.askopenfilename()
     def csv_import(self, csv_org_file):
@@ -49,6 +49,8 @@ class CreateProtectionJob(object):
     pass
 
 def main():
+    csv = CsvImport()
+    
     pass
     #Create authenticated controller token
     # cohesity_client = CohesityUserAuthentication()
