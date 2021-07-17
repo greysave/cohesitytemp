@@ -13,6 +13,8 @@ import getpass
 import csv
 import tkinter as tk
 from tkinter import filedialog
+import magic
+import pandas as pd
 
 #User Authentication Token/Controller Object
 class CohesityUserAuthentication(object):
@@ -32,15 +34,31 @@ class CohesityUserAuthentication(object):
 #CSV Import Class
 class CsvImport(object):
     def __init__(self):
+        pass
+    
+    def open_csv(self):
         self.root = tk.Tk()
         self.root.withdraw()
         self.file_path = filedialog.askopenfilename()
-    def csv_import(self, csv_org_file):
-        with open(self.csv_file, "rt") as infile, open(self.csv_mod_file, "wt") as outfile:
-            reader = csv.reader(infile)
-            next(reader, None)
+        return self.file_path   
+               
+    def verify_csv(self, csv_file):
+        self.csv_file = csv_file
+        if (magic.from_file(self.csv_file, mime=True) == "text/plain" or magic.from_file(self.csv_file, mime=True).__contains__("text/csv")
+            or magic.from_file(self.csv_file).__contains__("ASCII text, with very long lines"))  and self.csv_file.__contains__(".csv".lower()):
+            return True
+        else:
+            return False
+            
+    def csv_import(self, csv_file):
+        #import csv of protection job names and return as alist
+        file = pd.read_csv(self.csv_file)
+        return(file.Hostname + '-' + file.Name)
+        
+        
     def __repr__(self):
-        print("Please select a file")
+        #print("Please select a file")
+        pass
 #Volume Recovery Class
 class VolumeRecovery(object):
     pass
@@ -49,9 +67,21 @@ class CreateProtectionJob(object):
     pass
 
 def main():
+    #Open and verify CSV File
     csv = CsvImport()
+    csv_file = csv.open_csv()
+    csv_verify = csv.verify_csv(csv_file)
+    #print(dir(pd))
+    if csv.verify_csv(csv_file) == True:
+        print("File Verified")
+    else:
+        print("File Failed Verifiecation please select a different file")
+    csv_verified_file = list(csv.csv_import(csv_file))
+    for item in csv_verified_file:
+        print(item)
     
-    pass
+        
+    
     #Create authenticated controller token
     # cohesity_client = CohesityUserAuthentication()
     # cohesity_client = cohesity_client.user_auth()
