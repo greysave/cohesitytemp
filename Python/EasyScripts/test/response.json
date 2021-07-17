@@ -1,1 +1,428 @@
-[{"id":"7307753125324436:1601671778819:53919","name":"Paul_replicate","fullSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{"days":["kFriday"]}},"incrementalSchedulingPolicy":{"periodicity":"kContinuous","continuousSchedule":{"backupIntervalMins":60}},"snapshotReplicationCopyPolicies":[{"target":{"clusterId":8533868141963182,"clusterName":"SV4-SRE-COHESITY02"},"Id":"ab7e3426-1ed0-4eda-6b05-c959e51e1eaf","periodicity":"kEvery","multiplier":1,"copyPartial":true,"daysToKeep":14}],"extendedRetentionPolicies":[{"Id":"f727e3ef-db37-47d1-7a13-1d8091029e9f","periodicity":"kMonth","multiplier":1,"daysToKeep":180}],"retries":3,"retryIntervalMins":5,"daysToKeep":14},{"id":"7307753125324436:1601671778819:32546","name":"Bac-Acrc","incrementalSchedulingPolicy":{"periodicity":"kContinuous","continuousSchedule":{"backupIntervalMins":10}},"snapshotArchivalCopyPolicies":[{"target":{"vaultId":461396,"vaultName":"S3_Archive","vaultType":"kCloud"},"Id":"1d4c27ec-86e3-46fe-7507-7a6b7d0ffd84","periodicity":"kMonth","multiplier":1,"copyPartial":true,"daysToKeep":14}],"retries":3,"retryIntervalMins":5,"daysToKeep":14},{"id":"7307753125324436:1601671778819:308597","name":"COLO_NFS_DS_Daily","incrementalSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{}},"snapshotReplicationCopyPolicies":[{"target":{"clusterId":986535865413332,"clusterName":"COLOSRECLU03"},"Id":"e8522697-cfa6-4480-7a57-a8ecb73f0644","periodicity":"kEvery","multiplier":1,"copyPartial":true,"daysToKeep":30}],"retries":3,"retryIntervalMins":5,"daysToKeep":30},{"id":"7307753125324436:1601671778819:383882","name":"COLO-SMB_DS_DAILY","incrementalSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{}},"snapshotReplicationCopyPolicies":[{"target":{"clusterId":8334389757023562,"clusterName":"COLOSRECLU02"},"Id":"6e1748e0-d3c7-4d37-53c2-b41d1eaa654d","periodicity":"kEvery","multiplier":1,"copyPartial":true,"daysToKeep":14}],"retries":3,"retryIntervalMins":5,"daysToKeep":14},{"id":"7307753125324436:1601671778819:407","name":"HK","fullSchedulingPolicy":{"periodicity":"kMonthly","monthlySchedule":{"day":"kSunday","dayCount":"kFirst"}},"incrementalSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{"days":["kWednesday"]}},"logSchedulingPolicy":{"periodicity":"kContinuous","continuousSchedule":{"backupIntervalMins":15}},"retries":3,"retryIntervalMins":5,"daysToKeep":180,"daysToKeepLog":6},{"id":"7307753125324436:1601671778819:165689","name":"FI-16251-Pol","incrementalSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{}},"retries":0,"retryIntervalMins":5,"daysToKeep":14},{"id":"7307753125324436:1601671778819:74732","name":"Onefull-weekly","incrementalSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{"days":["kSaturday"]}},"blackoutPeriods":[{"Id":"f20045a3-143f-4f85-4280-1314b46dba69","day":"kFriday","startTime":{"hour":0,"minute":0},"endTime":{"hour":23,"minute":59}},{"Id":"3f99ee41-99f5-4769-6a7b-9566bfff7746","day":"kSunday","startTime":{"hour":0,"minute":0},"endTime":{"hour":23,"minute":59}},{"Id":"784b14c4-1169-496c-48f5-54b3b5d2795b","day":"kMonday","startTime":{"hour":0,"minute":0},"endTime":{"hour":23,"minute":59}},{"Id":"36749715-73cb-4b1a-513f-ecd582053c07","day":"kTuesday","startTime":{"hour":0,"minute":0},"endTime":{"hour":23,"minute":59}},{"Id":"b2832202-2a6d-430a-52f8-c85f09cd179d","day":"kWednesday","startTime":{"hour":0,"minute":0},"endTime":{"hour":23,"minute":59}},{"Id":"ae1f04d8-9e0f-49c5-4439-87b0217d6538","day":"kThursday","startTime":{"hour":0,"minute":0},"endTime":{"hour":23,"minute":59}},{"Id":"1a580544-f97d-4d67-6e05-c52184d0de30","day":"kSaturday","startTime":{"hour":0,"minute":0},"endTime":{"hour":21,"minute":30}}],"retries":3,"retryIntervalMins":5,"daysToKeep":7},{"id":"7307753125324436:1601671778819:4","name":"Default Policy","type":"kRPO","rpoPolicySettings":{"storageDomainId":20},"incrementalSchedulingPolicy":{"periodicity":"kContinuousRPO","rpoSchedule":{"intervalUnit":"kDay","multiplier":1}},"retries":2,"retryIntervalMins":5,"daysToKeep":14},{"id":"7307753125324436:1601671778819:3","name":"Bronze","incrementalSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{}},"extendedRetentionPolicies":[{"Id":null,"periodicity":"kWeek","multiplier":1,"daysToKeep":90},{"Id":null,"periodicity":"kMonth","multiplier":1,"daysToKeep":365}],"retries":2,"retryIntervalMins":5,"daysToKeep":30},{"id":"7307753125324436:1601671778819:1","name":"Gold","incrementalSchedulingPolicy":{"periodicity":"kContinuous","continuousSchedule":{"backupIntervalMins":240}},"logSchedulingPolicy":{"periodicity":"kContinuous","continuousSchedule":{"backupIntervalMins":60}},"extendedRetentionPolicies":[{"Id":"2a7bb8db-de0b-4f13-6995-d8f4a9913b98","periodicity":"kDay","multiplier":1,"daysToKeep":90},{"Id":"dc4a2d61-0bfc-4c2e-508f-e1bc4d291f07","periodicity":"kWeek","multiplier":1,"daysToKeep":365},{"Id":"f112d5ca-22fb-4292-4b2c-0228ef6de772","periodicity":"kMonth","multiplier":1,"daysToKeep":1096}],"retries":3,"retryIntervalMins":5,"daysToKeep":7,"daysToKeepLog":14},{"id":"7307753125324436:1601671778819:2","name":"Silver","incrementalSchedulingPolicy":{"periodicity":"kContinuous","continuousSchedule":{"backupIntervalMins":720}},"extendedRetentionPolicies":[{"Id":null,"periodicity":"kDay","multiplier":1,"daysToKeep":90},{"Id":null,"periodicity":"kWeek","multiplier":1,"daysToKeep":365},{"Id":null,"periodicity":"kMonth","multiplier":1,"daysToKeep":730}],"retries":2,"retryIntervalMins":5,"daysToKeep":14},{"id":"7307753125324436:1601671778819:1266","name":"Tarun_Archive","fullSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{}},"incrementalSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{}},"snapshotArchivalCopyPolicies":[{"target":{"vaultId":461396,"vaultName":"S3_Archive","vaultType":"kCloud"},"Id":"97e2d948-546d-4134-4d6c-622fb74251cd","periodicity":"kEvery","multiplier":1,"copyPartial":true,"daysToKeep":3}],"retries":3,"retryIntervalMins":5,"daysToKeep":4},{"id":"7307753125324436:1601671778819:301636","name":"Ansible_Policy","description":"This is my first Protection Policy Created through Ansible","incrementalSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{}},"retries":3,"retryIntervalMins":30,"daysToKeep":7},{"id":"7307753125324436:1601671778819:74704","name":"test","incrementalSchedulingPolicy":{"periodicity":"kDaily","dailySchedule":{}},"retries":4,"retryIntervalMins":5,"daysToKeep":14}]
+[
+    {
+        "id": "7307753125324436:1601671778819:53919",
+        "name": "Paul_replicate",
+        "fullSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {
+                "days": [
+                    "kFriday"
+                ]
+            }
+        },
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kContinuous",
+            "continuousSchedule": {
+                "backupIntervalMins": 60
+            }
+        },
+        "snapshotReplicationCopyPolicies": [
+            {
+                "target": {
+                    "clusterId": 8533868141963182,
+                    "clusterName": "SV4-SRE-COHESITY02"
+                },
+                "Id": "ab7e3426-1ed0-4eda-6b05-c959e51e1eaf",
+                "periodicity": "kEvery",
+                "multiplier": 1,
+                "copyPartial": true,
+                "daysToKeep": 14
+            }
+        ],
+        "extendedRetentionPolicies": [
+            {
+                "Id": "f727e3ef-db37-47d1-7a13-1d8091029e9f",
+                "periodicity": "kMonth",
+                "multiplier": 1,
+                "daysToKeep": 180
+            }
+        ],
+        "retries": 3,
+        "retryIntervalMins": 5,
+        "daysToKeep": 14
+    },
+    {
+        "id": "7307753125324436:1601671778819:32546",
+        "name": "Bac-Acrc",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kContinuous",
+            "continuousSchedule": {
+                "backupIntervalMins": 10
+            }
+        },
+        "snapshotArchivalCopyPolicies": [
+            {
+                "target": {
+                    "vaultId": 461396,
+                    "vaultName": "S3_Archive",
+                    "vaultType": "kCloud"
+                },
+                "Id": "1d4c27ec-86e3-46fe-7507-7a6b7d0ffd84",
+                "periodicity": "kMonth",
+                "multiplier": 1,
+                "copyPartial": true,
+                "daysToKeep": 14
+            }
+        ],
+        "retries": 3,
+        "retryIntervalMins": 5,
+        "daysToKeep": 14
+    },
+    {
+        "id": "7307753125324436:1601671778819:308597",
+        "name": "COLO_NFS_DS_Daily",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {}
+        },
+        "snapshotReplicationCopyPolicies": [
+            {
+                "target": {
+                    "clusterId": 986535865413332,
+                    "clusterName": "COLOSRECLU03"
+                },
+                "Id": "e8522697-cfa6-4480-7a57-a8ecb73f0644",
+                "periodicity": "kEvery",
+                "multiplier": 1,
+                "copyPartial": true,
+                "daysToKeep": 30
+            }
+        ],
+        "retries": 3,
+        "retryIntervalMins": 5,
+        "daysToKeep": 30
+    },
+    {
+        "id": "7307753125324436:1601671778819:383882",
+        "name": "COLO-SMB_DS_DAILY",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {}
+        },
+        "snapshotReplicationCopyPolicies": [
+            {
+                "target": {
+                    "clusterId": 8334389757023562,
+                    "clusterName": "COLOSRECLU02"
+                },
+                "Id": "6e1748e0-d3c7-4d37-53c2-b41d1eaa654d",
+                "periodicity": "kEvery",
+                "multiplier": 1,
+                "copyPartial": true,
+                "daysToKeep": 14
+            }
+        ],
+        "retries": 3,
+        "retryIntervalMins": 5,
+        "daysToKeep": 14
+    },
+    {
+        "id": "7307753125324436:1601671778819:407",
+        "name": "HK",
+        "fullSchedulingPolicy": {
+            "periodicity": "kMonthly",
+            "monthlySchedule": {
+                "day": "kSunday",
+                "dayCount": "kFirst"
+            }
+        },
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {
+                "days": [
+                    "kWednesday"
+                ]
+            }
+        },
+        "logSchedulingPolicy": {
+            "periodicity": "kContinuous",
+            "continuousSchedule": {
+                "backupIntervalMins": 15
+            }
+        },
+        "retries": 3,
+        "retryIntervalMins": 5,
+        "daysToKeep": 180,
+        "daysToKeepLog": 6
+    },
+    {
+        "id": "7307753125324436:1601671778819:165689",
+        "name": "FI-16251-Pol",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {}
+        },
+        "retries": 0,
+        "retryIntervalMins": 5,
+        "daysToKeep": 14
+    },
+    {
+        "id": "7307753125324436:1601671778819:74732",
+        "name": "Onefull-weekly",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {
+                "days": [
+                    "kSaturday"
+                ]
+            }
+        },
+        "blackoutPeriods": [
+            {
+                "Id": "f20045a3-143f-4f85-4280-1314b46dba69",
+                "day": "kFriday",
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59
+                }
+            },
+            {
+                "Id": "3f99ee41-99f5-4769-6a7b-9566bfff7746",
+                "day": "kSunday",
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59
+                }
+            },
+            {
+                "Id": "784b14c4-1169-496c-48f5-54b3b5d2795b",
+                "day": "kMonday",
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59
+                }
+            },
+            {
+                "Id": "36749715-73cb-4b1a-513f-ecd582053c07",
+                "day": "kTuesday",
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59
+                }
+            },
+            {
+                "Id": "b2832202-2a6d-430a-52f8-c85f09cd179d",
+                "day": "kWednesday",
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59
+                }
+            },
+            {
+                "Id": "ae1f04d8-9e0f-49c5-4439-87b0217d6538",
+                "day": "kThursday",
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59
+                }
+            },
+            {
+                "Id": "1a580544-f97d-4d67-6e05-c52184d0de30",
+                "day": "kSaturday",
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0
+                },
+                "endTime": {
+                    "hour": 21,
+                    "minute": 30
+                }
+            }
+        ],
+        "retries": 3,
+        "retryIntervalMins": 5,
+        "daysToKeep": 7
+    },
+    {
+        "id": "7307753125324436:1601671778819:4",
+        "name": "Default Policy",
+        "type": "kRPO",
+        "rpoPolicySettings": {
+            "storageDomainId": 20
+        },
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kContinuousRPO",
+            "rpoSchedule": {
+                "intervalUnit": "kDay",
+                "multiplier": 1
+            }
+        },
+        "retries": 2,
+        "retryIntervalMins": 5,
+        "daysToKeep": 14
+    },
+    {
+        "id": "7307753125324436:1601671778819:3",
+        "name": "Bronze",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {}
+        },
+        "extendedRetentionPolicies": [
+            {
+                "Id": null,
+                "periodicity": "kWeek",
+                "multiplier": 1,
+                "daysToKeep": 90
+            },
+            {
+                "Id": null,
+                "periodicity": "kMonth",
+                "multiplier": 1,
+                "daysToKeep": 365
+            }
+        ],
+        "retries": 2,
+        "retryIntervalMins": 5,
+        "daysToKeep": 30
+    },
+    {
+        "id": "7307753125324436:1601671778819:1",
+        "name": "Gold",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kContinuous",
+            "continuousSchedule": {
+                "backupIntervalMins": 240
+            }
+        },
+        "logSchedulingPolicy": {
+            "periodicity": "kContinuous",
+            "continuousSchedule": {
+                "backupIntervalMins": 60
+            }
+        },
+        "extendedRetentionPolicies": [
+            {
+                "Id": "2a7bb8db-de0b-4f13-6995-d8f4a9913b98",
+                "periodicity": "kDay",
+                "multiplier": 1,
+                "daysToKeep": 90
+            },
+            {
+                "Id": "dc4a2d61-0bfc-4c2e-508f-e1bc4d291f07",
+                "periodicity": "kWeek",
+                "multiplier": 1,
+                "daysToKeep": 365
+            },
+            {
+                "Id": "f112d5ca-22fb-4292-4b2c-0228ef6de772",
+                "periodicity": "kMonth",
+                "multiplier": 1,
+                "daysToKeep": 1096
+            }
+        ],
+        "retries": 3,
+        "retryIntervalMins": 5,
+        "daysToKeep": 7,
+        "daysToKeepLog": 14
+    },
+    {
+        "id": "7307753125324436:1601671778819:2",
+        "name": "Silver",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kContinuous",
+            "continuousSchedule": {
+                "backupIntervalMins": 720
+            }
+        },
+        "extendedRetentionPolicies": [
+            {
+                "Id": null,
+                "periodicity": "kDay",
+                "multiplier": 1,
+                "daysToKeep": 90
+            },
+            {
+                "Id": null,
+                "periodicity": "kWeek",
+                "multiplier": 1,
+                "daysToKeep": 365
+            },
+            {
+                "Id": null,
+                "periodicity": "kMonth",
+                "multiplier": 1,
+                "daysToKeep": 730
+            }
+        ],
+        "retries": 2,
+        "retryIntervalMins": 5,
+        "daysToKeep": 14
+    },
+    {
+        "id": "7307753125324436:1601671778819:1266",
+        "name": "Tarun_Archive",
+        "fullSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {}
+        },
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {}
+        },
+        "snapshotArchivalCopyPolicies": [
+            {
+                "target": {
+                    "vaultId": 461396,
+                    "vaultName": "S3_Archive",
+                    "vaultType": "kCloud"
+                },
+                "Id": "97e2d948-546d-4134-4d6c-622fb74251cd",
+                "periodicity": "kEvery",
+                "multiplier": 1,
+                "copyPartial": true,
+                "daysToKeep": 3
+            }
+        ],
+        "retries": 3,
+        "retryIntervalMins": 5,
+        "daysToKeep": 4
+    },
+    {
+        "id": "7307753125324436:1601671778819:301636",
+        "name": "Ansible_Policy",
+        "description": "This is my first Protection Policy Created through Ansible",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {}
+        },
+        "retries": 3,
+        "retryIntervalMins": 30,
+        "daysToKeep": 7
+    },
+    {
+        "id": "7307753125324436:1601671778819:74704",
+        "name": "test",
+        "incrementalSchedulingPolicy": {
+            "periodicity": "kDaily",
+            "dailySchedule": {}
+        },
+        "retries": 4,
+        "retryIntervalMins": 5,
+        "daysToKeep": 14
+    }
+]
