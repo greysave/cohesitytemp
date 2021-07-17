@@ -31,6 +31,18 @@ class CohesityUserAuthentication(object):
     def user_auth(self):
         #Autneticate to the cluster method
         return CohesityClient(self.cluster_ip, self.username, self.password, self.domain)
+
+
+class ProtectedObjects(object):
+    def get_protection_jobs(self, cohesity_client, job_list):
+        pass
+        self.job_list = job_list
+        jobs = []
+        self.protection_jobs = cohesity_client.protection_jobs
+        self.jobs_list = self.protection_jobs.get_protection_jobs()
+        for job in self.jobs_list:
+            jobs.append(job.name)
+        
 #CSV Import Class
 class CsvImport(object):
     def __init__(self):
@@ -67,6 +79,10 @@ class CreateProtectionJob(object):
     pass
 
 def main():
+     #Create authenticated controller token
+    cohesity_client = CohesityUserAuthentication()
+    cohesity_client = cohesity_client.user_auth()
+    
     #Open and verify CSV File
     csv = CsvImport()
     csv_file = csv.open_csv()
@@ -77,14 +93,12 @@ def main():
     else:
         print("File Failed Verifiecation please select a different file")
     csv_verified_file = list(csv.csv_import(csv_file))
-    for item in csv_verified_file:
-        print(item)
+    
+    
     
         
     
-    #Create authenticated controller token
-    # cohesity_client = CohesityUserAuthentication()
-    # cohesity_client = cohesity_client.user_auth()
+   
     
 
 #Initate Main Function
