@@ -7,7 +7,7 @@ from cohesity_management_sdk.models.environment_list_protected_objects_enum impo
 from cohesity_management_sdk.models.protection_job_request_body import ProtectionJobRequestBody as body
 from cohesity_management_sdk.models.environment_enum import EnvironmentEnum as env
 import datetime
-#import os
+import os
 import getpass
 #import sys
 
@@ -169,6 +169,8 @@ def main():
         if item.protection_source.environment == env_enum[0]:
             print("{name} is of the {envio} type.".format(name = item.protection_source.name, envio = item.protection_source.environment))
         #print(dir(item.unprotected_sources_summary))
+        
+    
           
         
        

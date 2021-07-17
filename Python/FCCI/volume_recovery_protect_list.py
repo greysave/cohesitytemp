@@ -44,7 +44,7 @@ class CsvImport(object):
                
     def verify_csv(self, csv_file):
         self.csv_file = csv_file
-        if (magic.from_file(self.csv_file, mime=True) == "text/plain" or magic.from_file(self.csv_file, mime=True).__contains__("text/csv")
+        if (magic.from_file(self.csv_file, mime=True).__contains__("text/plain") or magic.from_file(self.csv_file, mime=True).__contains__("text/csv")
             or magic.from_file(self.csv_file).__contains__("ASCII text, with very long lines"))  and self.csv_file.__contains__(".csv".lower()):
             return True
         else:
