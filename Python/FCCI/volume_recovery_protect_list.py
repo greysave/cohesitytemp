@@ -40,7 +40,8 @@ class CsvImport(object):
         self.root = tk.Tk()
         self.root.withdraw()
         self.file_path = filedialog.askopenfilename()
-        return self.file_path   
+        ret
+        urn self.file_path   
                
     def verify_csv(self, csv_file):
         self.csv_file = csv_file
