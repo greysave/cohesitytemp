@@ -39,22 +39,25 @@ class CohesityUserAuthentication(object):
 
 class ProtectedObjects(object):
     def get_protection_jobs(self, cohesity_client, csv_file):
+        job_id = []
         self.csv_file = csv_file
         names = []
+        self.jobs_list = []
         for i, j in self.csv_file.iterrows():
             names.append(j.Name)
         self.protection_jobs = cohesity_client.protection_jobs
-        self.jobs_list = self.protection_jobs.get_protection_jobs(names = "gregtest")
+        
+        for name in names:
+            self.jobs_list.extend(self.protection_jobs.get_protection_jobs(names = name))
+        
         for job in self.jobs_list:
-            #Add new column to CSV with jobID
-            csv_file["JobID"] = job.id
-            return csv_file
-            
+            #test.extend(self.jobs_list)
+            #print(job.id)
+            job_id.append(job.id)
+        self.csv_file["JobID"] = job_id
+        return(self.csv_file)
        
-            #return jobs
     
-    def test(self, cohesity_client, file):
-        pass
     def recover_nas_list(self, cohesity_client, csv_file):
         self.csv_file = csv_file
         #self.job_name = list(self.csv_file.Hostname + "-" + self.csv_file.Name)
@@ -66,29 +69,17 @@ class ProtectedObjects(object):
             #Create Recovery Task
             body = RecoverTaskRequest()
             body.mtype = 'kMountFileVolume'
+            body.view_name = j.Name
             body.objects = []
             body.objects.append(RestoreObjectDetails())
             body.name = "Recover-{name}".format(name = j.Name)
             body.objects[0].job_id = j.JobID
-            #Update View Parameters
             body.restore_view_parameters = UpdateViewParam()
             body.restore_view_parameters.protocol_access = ProtocolAccessEnum.KSMBONLY
             body.restore_view_parameters.enable_smb_view_discovery = True
-            
             cohesity_client.restore_tasks.create_recover_task(body=body)
-            
-        #     for item in self.job_name:
-        #         body.name = self.name
-        #         body.objects.job_name = self.job_name
-        #         #testlist.append(body.name, body.job_name)
-        #         return item
-                
-            # body.objects.append(RestoreObjectDetails())
-            # body.objects.job_name = self.job_name
-        #return job_name
-            #return body.job_name
-            
-            
+            print("The generic nas {Hostname}\\{Name} has been recovered".format(Hostname = j.Hostname, Name = j.Name))
+                    
         
 #CSV Import Class
 class CsvImport(object):
@@ -121,12 +112,6 @@ class CsvImport(object):
     def __repr__(self):
         #print("Please select a file")
         pass
-#Volume Recovery Class
-class VolumeRecovery(object):
-    pass
-#Protection Job Class
-class CreateProtectionJob(object):
-    pass
 
 def main():
      #Create authenticated controller token
@@ -143,15 +128,10 @@ def main():
     else:
         print("File Failed Verifiecation please select a different file")
     csv_verified_file = csv.csv_import(csv_file)
-    #print(csv_verified_file)
-    #csv_protection_job_name = list(csv_verified_file.Hostname + "-" + csv_verified_file.Name)
-   # print(csv_protection_job_name)
-    # obj_restore = ProtectedObjects.recover_nas_list(cohesity_client, csv_file)
-    # print(obj_restore)
     protected_object = ProtectedObjects()
     protection_jobs = protected_object.get_protection_jobs(cohesity_client, csv_verified_file)
     #print(protection_jobs)
-    recvery_job = protected_object.recover_nas_list(cohesity_client, protection_jobs)
+    recovery_job = protected_object.recover_nas_list(cohesity_client, protection_jobs)
     
     
     
