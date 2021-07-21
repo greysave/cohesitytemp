@@ -11,6 +11,7 @@ from cohesity_management_sdk.models.restore_object_details import RestoreObjectD
 from cohesity_management_sdk.models.update_view_param import UpdateViewParam
 from cohesity_management_sdk.models.protection_job_request_body import ProtectionJobRequestBody
 from cohesity_management_sdk.models.environment_enum import EnvironmentEnum as env
+from cohesity_management_sdk.models.run_protection_job_param import RunProtectionJobParam
 import datetime
 import os
 import getpass
@@ -36,8 +37,21 @@ class CohesityUserAuthentication(object):
         #Autneticate to the cluster method
         return CohesityClient(self.cluster_ip, self.username, self.password, self.domain)
 
-
-class ProtectedObjects(object):
+class StorageDomainObject(object):
+    def __init__(self):
+        self.storage_domain = getpass._raw_input("Please enter the Storage Domain to use:  ")
+        
+    def get_storage_domain_id(self, cohesity_client):
+        view_box =  cohesity_client.view_boxes.get_view_boxes(names=self.storage_domain)
+        return view_box[0].id
+class PolicyObject(object):
+    def __init__(self):
+        self.policy_name = getpass._raw_input("Please enter the Protection Policy to use:  ")
+        
+    def get_policy_id(self, cohesity_client):
+        policy =  cohesity_client.protection_policies.get_protection_policies(names=self.policy_name)
+        return policy[0].id
+class ProtectedObjects(object):       
     def get_protection_jobs(self, cohesity_client, csv_file):
         job_id = []
         self.csv_file = csv_file
@@ -58,11 +72,7 @@ class ProtectedObjects(object):
     
     def recover_nas_list(self, cohesity_client, csv_file):
         self.csv_file = csv_file
-        #self.job_name = list(self.csv_file.Hostname + "-" + self.csv_file.Name)
-        #
-        testlist = []
-       
-        self.protection_jobs = cohesity_client.protection_jobs
+              
         for i, j in csv_file.iterrows():
             #Create Recovery Task
             body = RecoverTaskRequest()
@@ -77,6 +87,21 @@ class ProtectedObjects(object):
             body.restore_view_parameters.enable_smb_view_discovery = True
             cohesity_client.restore_tasks.create_recover_task(body=body)
             print("The generic nas {Hostname}\\{Name} has been recovered".format(Hostname = j.Hostname, Name = j.Name))
+            
+    def create_view_protection_job(self, csv_file, cohesity_client, policy_id, storage_domain_id):
+        body = ProtectionJobRequestBody()
+        body.environment = env.KVIEW
+        body.view_box_id = storage_domain_id
+        body.policy_id = policy_id
+        body.timezone = cohesity_client.cluster.get_cluster().timezone
+        for i, j in csv_file.iterrows():
+            body.name = j.Name
+            body.view_name = j.Name
+            cohesity_client.protection_jobs.create_protection_job(body=body)
+            print("The Cohesity View protection job {Name} has been created".format(Name = j.Name))
+        
+        
+        
                     
         
 #CSV Import Class
@@ -115,21 +140,29 @@ def main():
      #Create authenticated controller token
     cohesity_client = CohesityUserAuthentication()
     cohesity_client = cohesity_client.user_auth()
+    policy_object = PolicyObject()
+    policy_id = policy_object.get_policy_id(cohesity_client)
+    storage_domain_object = StorageDomainObject()
+    storage_domain_id = storage_domain_object.get_storage_domain_id(cohesity_client)
+    print(policy_id)
+    print(storage_domain_id)
     
     #Open and verify CSV File
+    #Open CSV File
     csv = CsvImport()
     csv_file = csv.open_csv()
+    #Verify CSV File
     csv_verify = csv.verify_csv(csv_file)
-    #print(dir(pd))
     if csv.verify_csv(csv_file) == True:
         print("File Verified")
     else:
         print("File Failed Verifiecation please select a different file")
+    #Verify CSV File
     csv_verified_file = csv.csv_import(csv_file)
     protected_object = ProtectedObjects()
     protection_jobs = protected_object.get_protection_jobs(cohesity_client, csv_verified_file)
-    #print(protection_jobs)
     recovery_job = protected_object.recover_nas_list(cohesity_client, protection_jobs)
+    view_protection_job = protected_object.create_view_protection_job(csv_verified_file, cohesity_client, policy_id, storage_domain_id)
     
     
     
