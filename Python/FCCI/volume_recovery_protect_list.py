@@ -51,8 +51,6 @@ class ProtectedObjects(object):
             self.jobs_list.extend(self.protection_jobs.get_protection_jobs(names = name))
         
         for job in self.jobs_list:
-            #test.extend(self.jobs_list)
-            #print(job.id)
             job_id.append(job.id)
         self.csv_file["JobID"] = job_id
         return(self.csv_file)
