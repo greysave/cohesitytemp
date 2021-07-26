@@ -36,6 +36,7 @@ class CohesityUserAuthentication(object):
         self.password = getpass.getpass(prompt='Please enter the user password: ', stream=None)
         self.domain = getpass._raw_input("Please Enter the user domain:  ")
 
+
     def user_auth(self):
         #Autneticate to the cluster method
         return CohesityClient(self.cluster_fqdn, self.username, self.password, self.domain)
@@ -88,8 +89,7 @@ class ViewObject(object):
             view_id.append(view.view_id)
         
         self.csv_file["ViewID"] = view_id
-        print(csv_file)
-        #return self.csv_file
+        return self.csv_file
 class ProtectedObjects(object):       
     def get_protection_jobs(self, cohesity_client, csv_file):
         job_id = []
@@ -104,13 +104,10 @@ class ProtectedObjects(object):
         
         for name in names:
             verified_job = self.protection_jobs.get_protection_jobs(names = name)
-            if verified_job.is_delted == False:
-                self.jobs_list.extend(verified_job)
-            # if verify_job.names.__contains__("DELETED"):
-            #     continue
-            # else:
-                
-        print(self.jobs_list)
+            for item in verified_job:
+                if item.is_deleted == False or item.is_deleted == None:
+                    self.jobs_list.append(item)
+        
         for job in self.jobs_list:
             job_id.append(job.id)
         self.csv_file["JobID"] = job_id
@@ -137,13 +134,25 @@ class ProtectedObjects(object):
             print("The generic nas {Hostname}\\{Name} has been recovered".format(Hostname = j.Hostname, Name = j.Name))
             
     def create_view_protection_job(self, cohesity_url, csv_file, cohesity_client, bearer_token, policy_id, storage_domain_id):
+        #Get time
+        time = cohesity_client.cluster.get_cluster()
+        #Get current cluster time
+        epoch = time.current_time_msecs
+        #Convert cluster time to 24 hour format
+        date = datetime.datetime.fromtimestamp(epoch/10**3)
+        #Set the zimezone difference this must be changed prior to running.  Need to create a class and object to handle this.
+        new_date = date + datetime.timedelta(hours = -3)
+        #get cluster timezone
         timezone = cohesity_client.cluster.get_cluster().timezone
+        #REST API Headers and auth
         headers = {"Authorization": "Bearer %s" % bearer_token.access_token}
+        #REST API Url
         url = 'https://{cohesity_url}/v2/data-protect/protection-groups'.format(cohesity_url=cohesity_url)
         protect_name = []
         protect_view_id = []
+        #Rest API payload thorugh loop
         for i, j in csv_file.iterrows():
-            payload = {"name": j.Name,"policyId": policy_id,"priority": "kMedium","storageDomainId": storage_domain_id,"startTime": {"timeZone": timezone}, "environment": "kView", "viewParams": {"objects": [{"id": j.ViewID, "name": j.Name}],"replicationParams": {"viewNameConfigList": [{"sourceViewId": j.ViewID,"useSameViewName": True}]},"indexingPolicy": {"enableIndexing": True,"includePaths": ["/"]}}}
+            payload = {"name": j.Name,"policyId": policy_id,"priority": "kMedium","storageDomainId": storage_domain_id,"startTime": {"hour": new_date.hour,"minute": new_date.minute,"timeZone": timezone}, "environment": "kView", "viewParams": {"objects": [{"id": j.ViewID, "name": j.Name}],"replicationParams": {"viewNameConfigList": [{"sourceViewId": j.ViewID,"useSameViewName": True}]},"indexingPolicy": {"enableIndexing": True,"includePaths": ["/"]}}}
             
             req = requests.post(url=url, data=json.dumps(payload), headers=headers, verify=False)
             print("The View {name} has been protected".format(name=j.Name))
@@ -202,31 +211,29 @@ def main():
     csv = CsvImport()
     csv_file = csv.open_csv()
     
-    # # # #Verify CSV File
+    #Verify CSV File
     csv_verify = csv.verify_csv(csv_file)
     if csv.verify_csv(csv_file) == True:
        print("File Verified")
     else:
        print("File Failed Verifiecation please select a different file")
     
-    # #import CSV File
+    #import CSV File
     csv_verified_file = csv.csv_import(csv_file)
     
-   
     #Get Protection Object
     protected_object = ProtectedObjects()
     
     #Get Protection Jobs
     protection_jobs = protected_object.get_protection_jobs(cc, csv_verified_file)
-    print(protection_jobs)
+    
     #Recover Protecion Job to a View
-    #recovery_job = protected_object.recover_nas_list(cc, protection_jobs)
+    recovery_job = protected_object.recover_nas_list(cc, protection_jobs)
     
     #Get View IDs
-    # view_object = ViewObject()
-    # view_id = view_object.get_view_id(cc, csv_verified_file)
-    
-    #view_protection_job = protected_object.create_view_protection_job(cohesity_url, view_id, cc, bearer_token, policy_id, storage_domain_id)
+    view_object = ViewObject()
+    view_id = view_object.get_view_id(cc, csv_verified_file)
+    view_protection_job = protected_object.create_view_protection_job(cohesity_url, view_id, cc, bearer_token, policy_id, storage_domain_id)
     
     
     
