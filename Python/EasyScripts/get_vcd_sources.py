@@ -33,6 +33,9 @@ class ProtectionObject(object):
         #     sources.append(source)
         #     print(dir(source))
         # return sources
+
+    def get_protection_object(self):
+        pass
     
 def main():
     #Set environment Variables
@@ -46,11 +49,20 @@ def main():
         pass
 
     #Get all protection jobs
+    protect_source = {}
     protect_object = ProtectionObject()
     vm_list_source = protect_object.list_vm_protection_source(cohesity_client, vm_env_src)
     for source in vm_list_source:
-        print(dir(source.protection_source))
-    
+        protect_source[source.protection_source.name] = source.protection_source.id
+        #print(z)
+    #print(dir(protect_source))
+    # for item in protect_source.items():
+    #     print(item)
+    #     if "vcloud" in item:
+    #         print(protect_source[item])
+    for k, v in protect_source.items():
+        if "vcloud" in k:
+            print(protect_source[k])
      
 
 if __name__ == '__main__':
