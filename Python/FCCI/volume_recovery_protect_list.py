@@ -169,8 +169,7 @@ class CsvImport(object):
         self.root = tk.Tk()
         self.root.withdraw()
         self.file_path = filedialog.askopenfilename()
-        ret
-        urn self.file_path   
+        return self.file_path   
                
     def verify_csv(self, csv_file):
         #Verify that the file is the correct format
