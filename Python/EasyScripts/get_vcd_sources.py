@@ -49,7 +49,7 @@ def main():
     protect_object = ProtectionObject()
     vm_list_source = protect_object.list_vm_protection_source(cohesity_client, vm_env_src)
     for source in vm_list_source:
-        print(dir(source.protection_source))
+        print(source.protection_source.id)
     
      
 
