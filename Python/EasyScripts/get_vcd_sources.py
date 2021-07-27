@@ -64,6 +64,9 @@ def main():
     vm_list_source = protect_object.list_vm_protection_source(cohesity_client, vm_env_src)
     
     source_id = protect_object.get_source_id(vm_list_source)
+    
+    result = cohesity_client.protection_sources.get_protection_objects
+    print(result)
     # for source in vm_list_source:
     #     protect_source[source.protection_source.name] = source.protection_source.id
         #print(z)
