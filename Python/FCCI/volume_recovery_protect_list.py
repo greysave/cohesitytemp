@@ -1,5 +1,6 @@
 #Storage Volume Recovery and Protection from CSV
 
+from tkinter.constants import TRUE
 from cohesity_management_sdk.cohesity_client import CohesityClient
 from cohesity_management_sdk.models.environment_get_protection_jobs_enum import EnvironmentGetProtectionJobsEnum as envjob
 from cohesity_management_sdk.models.environment_list_protection_sources_enum import EnvironmentListProtectionSourcesEnum as envsrc
@@ -129,7 +130,7 @@ class ProtectedObjects(object):
             body.objects[0].job_id = j.JobID
             body.restore_view_parameters = UpdateViewParam()
             body.restore_view_parameters.protocol_access = ProtocolAccessEnum.KSMBONLY
-            body.restore_view_parameters.enable_smb_view_discovery = True
+            body.restore_view_parameters.enable_smb_view_discovery = TRUE
             cohesity_client.restore_tasks.create_recover_task(body=body)
             print("The generic nas {Hostname}\\{Name} has been recovered".format(Hostname = j.Hostname, Name = j.Name))
             
