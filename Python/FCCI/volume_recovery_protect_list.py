@@ -19,6 +19,7 @@ import datetime
 import os
 import getpass
 import csv
+import re
 import tkinter as tk
 from tkinter import filedialog
 import magic
@@ -101,7 +102,8 @@ class ViewObject(object):
             print("The View {name} has been set to SMB browsable".format(name=j.Name))
     
     
-class ProtectedObjects(object):       
+class ProtectedObjects(object):
+
     def get_protection_jobs(self, cohesity_client, csv_file):
         job_id = []
         names = []
@@ -115,6 +117,9 @@ class ProtectedObjects(object):
         #Look for protection job names
         for name in names:
             #Verify protection job
+            if name.__contains__('\\'):
+                name = name.replace('\\', '-')
+                
             verified_job = self.protection_jobs.get_protection_jobs(names = name)
             #search verified job
             for item in verified_job:
@@ -135,16 +140,21 @@ class ProtectedObjects(object):
               
         for i, j in csv_file.iterrows():
             #Create Recovery Task
+            name = j.Name
+            #remove the \ and before
+            if name.__contains__('\\'):
+                name = re.sub(r'.*\\', '', j.Name)
+
             body = RecoverTaskRequest()
             body.mtype = 'kMountFileVolume'
             body.view_name = j.Name
             body.objects = []
             body.objects.append(RestoreObjectDetails())
-            body.name = "Recover-{name}".format(name = j.Name)
+            body.name = "Recover-{name}".format(name = name)
             body.objects[0].job_id = j.JobID
             body.restore_view_parameters = UpdateViewParam()
             body.restore_view_parameters.protocol_access = ProtocolAccessEnum.KSMBONLY
-            body.restore_view_parameters.enable_smb_view_discovery = True 
+ 
             cohesity_client.restore_tasks.create_recover_task(body=body)
             print("The generic nas {Hostname}\\{Name} has been recovered".format(Hostname = j.Hostname, Name = j.Name))
             
@@ -270,17 +280,17 @@ def main():
     #Get Protection Jobs
     protection_jobs = protected_object.get_protection_jobs(cc, csv_verified_file)
     
-    #Recover Protecion Job to a View
+    # Recover Protecion Job to a View
     recovery_job = protected_object.recover_nas_list(cc, protection_jobs)
     
-    #Get View IDs
+    # Get View IDs
     view_object = ViewObject()
     view_id = view_object.get_view_id(cc, csv_verified_file)
     
     
     view_protection_job = protected_object.create_view_protection_job(cohesity_url, view_id, cc, bearer_token, policy_id, storage_domain_id)
 
-    #Update View Objects
+    # Update View Objects
     view_object.set_view_params(cc, csv_verified_file)
     
 #Initate Main Function
