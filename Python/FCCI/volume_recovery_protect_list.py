@@ -100,6 +100,7 @@ class ViewObject(object):
             body = UpdateViewParam()
             body.enable_smb_view_discovery = True
             cohesity_client.views.update_view_by_name(name=j.Name, body=body)
+            print("The View {name} has been set to SMB browsable".format(name=j.Name))
     
     
 class ProtectedObjects(object):       
@@ -171,12 +172,7 @@ class ProtectedObjects(object):
             
             req = requests.post(url=url, data=json.dumps(payload), headers=headers, verify=False)
             print("The View {name} has been protected".format(name=j.Name))
-<<<<<<< HEAD
-
-   # def create_view_protection_job(self, cohesity_url, csv_file, cohesity_client, bearer_token, policy_id, storage_domain_id):
-=======
             
->>>>>>> b3715c14418d3603a97e8ee3a2434efcf9dafdc0
                            
         
 #CSV Import Class
@@ -254,10 +250,12 @@ def main():
     #Get View IDs
     view_object = ViewObject()
     view_id = view_object.get_view_id(cc, csv_verified_file)
-    #Update View Objects
-    view_object.set_view_params(cc, csv_verified_file)
+    
     
     view_protection_job = protected_object.create_view_protection_job(cohesity_url, view_id, cc, bearer_token, policy_id, storage_domain_id)
+
+    #Update View Objects
+    view_object.set_view_params(cc, csv_verified_file)
     
     
     
