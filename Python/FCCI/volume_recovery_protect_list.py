@@ -76,26 +76,24 @@ class ViewObject(object):
         names = []
         self.view_list = []
         self.csv_file = csv_file
-        
-        
+        #get list of names from csv
         for i, j in self.csv_file.iterrows():
              names.append(j.Name)
-        
-             
+        #Create Views  object  
         self.views = cohesity_client.views
-        
+        #append list of view names
         for name in names:
             self.view_list.append(self.views.get_view_by_name(name = name))
-        
+        #append list of view ids
         for view in self.view_list:
             view_id.append(view.view_id)
-        
+        #create column for View ID in CSV
         self.csv_file["ViewID"] = view_id
         return self.csv_file
     
     def set_view_params(self, cohesity_client, csv_file):
         self.csv_file = csv_file
-
+        #Update view parameters
         for i, j in csv_file.iterrows():
             body = UpdateViewParam()
             body.enable_smb_view_discovery = True
@@ -109,20 +107,24 @@ class ProtectedObjects(object):
         names = []
         self.jobs_list = []
         self.csv_file = csv_file
-        
+        #append list of protection job names from csv
         for i, j in self.csv_file.iterrows():
             names.append(j.Name)
-        
+        #create protection object
         self.protection_jobs = cohesity_client.protection_jobs
-        
+        #Look for protection job names
         for name in names:
+            #Verify protection job
             verified_job = self.protection_jobs.get_protection_jobs(names = name)
+            #search verified job
             for item in verified_job:
+                #Append only non-deleted jobs
                 if item.is_deleted == False or item.is_deleted == None:
                     self.jobs_list.append(item)
-        
+        #loop through job list
         for job in self.jobs_list:
             job_id.append(job.id)
+        #add jobID column to csv file
         self.csv_file["JobID"] = job_id
         
         return(self.csv_file)
@@ -165,10 +167,34 @@ class ProtectedObjects(object):
         protect_view_id = []
         #Rest API payload thorugh loop
         for i, j in csv_file.iterrows():
-            payload = {"name": j.Name,"policyId": policy_id,"priority": "kMedium","storageDomainId": storage_domain_id, \
-                "startTime": {"hour": new_date.hour,"minute": new_date.minute,"timeZone": timezone}, "environment": "kView", \
-                    "viewParams": {"objects": [{"id": j.ViewID, "name": j.Name}],"replicationParams": {"viewNameConfigList": [{"sourceViewId": j.ViewID,"useSameViewName": True}]}, \
-                        "indexingPolicy": {"enableIndexing": True,"includePaths": ["/"]}}}
+            payload = {
+                "name": j.Name,
+                "policyId": policy_id,
+                "priority": "kMedium",
+                "storageDomainId": storage_domain_id,
+                "startTime": {
+                    "hour": new_date.hour,
+                    "minute": new_date.minute,
+                    "timeZone": timezone
+                },
+                "environment": "kView",
+                "viewParams": {
+                    "objects": [{
+                        "id": j.ViewID,
+                        "name": j.Name
+                    }],
+                    "replicationParams": {
+                        "viewNameConfigList": [{
+                            "sourceViewId": j.ViewID,
+                            "useSameViewName": True
+                        }]
+                    },
+                    "indexingPolicy": {
+                        "enableIndexing": True,
+                        "includePaths": ["/"]
+                    }
+                }
+            }
             
             req = requests.post(url=url, data=json.dumps(payload), headers=headers, verify=False)
             print("The View {name} has been protected".format(name=j.Name))
@@ -256,8 +282,6 @@ def main():
 
     #Update View Objects
     view_object.set_view_params(cc, csv_verified_file)
-    
-    
     
 #Initate Main Function
 if __name__ == '__main__':
