@@ -130,7 +130,7 @@ class ProtectedObjects(object):
             body.objects[0].job_id = j.JobID
             body.restore_view_parameters = UpdateViewParam()
             body.restore_view_parameters.protocol_access = ProtocolAccessEnum.KSMBONLY
-            body.restore_view_parameters.enable_smb_view_discovery = True
+            body.restore_view_parameters.enable_smb_view_discovery = True 
             cohesity_client.restore_tasks.create_recover_task(body=body)
             print("The generic nas {Hostname}\\{Name} has been recovered".format(Hostname = j.Hostname, Name = j.Name))
             
@@ -157,6 +157,8 @@ class ProtectedObjects(object):
             
             req = requests.post(url=url, data=json.dumps(payload), headers=headers, verify=False)
             print("The View {name} has been protected".format(name=j.Name))
+
+   # def create_view_protection_job(self, cohesity_url, csv_file, cohesity_client, bearer_token, policy_id, storage_domain_id):
                            
         
 #CSV Import Class

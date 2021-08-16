@@ -6,9 +6,13 @@ from cohesity_management_sdk.models.environment_list_protected_objects_enum impo
 from cohesity_management_sdk.models.protection_job_request_body import ProtectionJobRequestBody as body
 from cohesity_management_sdk.models.environment_enum import EnvironmentEnum as env
 from cohesity_management_sdk.models.environment_list_protection_sources_registration_info_enum import EnvironmentListProtectionSourcesRegistrationInfoEnum as envreg
+from cohesity_management_sdk.models.environment_list_protection_sources_root_nodes_enum import EnvironmentListProtectionSourcesRootNodesEnum as envnode
+from cohesity_management_sdk.models.access_token_credential import AccessTokenCredential
 import datetime
 import os
 import getpass
+import json
+import requests
 
 class CohesityUserAuthentication(object):
     
@@ -16,25 +20,35 @@ class CohesityUserAuthentication(object):
         """
         Intializing input authentication variables
         """
-        self.cluster_ip = getpass._raw_input("Please enter the cluster VIP:  ")
-        self.username = getpass._raw_input("Please Enter the username:  ") 
-        self.password = getpass.getpass(prompt='Please enter the user password: ', stream=None)
-        self.domain = getpass._raw_input("Please Enter the user domain:  ")
+        self.cluster_fqdn = "localhost:52182"
+        self.username = "gsavage@VCD"
+        self.password = "Sa9e$2y!"
+        self.domain = "local"
+        # self.cluster_fqdn = getpass._raw_input("Please enter the cluster VIP:  ")
+        # self.username = getpass._raw_input("Please Enter the username:  ") 
+        # self.password = getpass.getpass(prompt='Please enter the user password: ', stream=None)
+        # self.domain = getpass._raw_input("Please Enter the user domain:  ")
 
     def user_auth(self):     
-      return CohesityClient(self.cluster_ip, self.username, self.password, self.domain)
+        return CohesityClient(self.cluster_fqdn, self.username, self.password, self.domain)
+      
+    def get_cluster_fqdn(self):
+        return self.cluster_fqdn
+    
+    def get_bearer_token(self, cohesity_cient):
+        access_token = cohesity_cient.access_tokens
+        body = AccessTokenCredential()
+        body.username = self.username
+        body.password = self.password
+        body.domain = self.domain
+        bearer_token = access_token.create_generate_access_token(body)
+        return bearer_token
   
 class ProtectionObject(object):
-    def list_vm_protection_source(self, cohesity_client, vm_env, tenant_list):
-        sources =[]
+    def list_vm_protection_source(self, cohesity_client, vm_env):
         self.protection_sources = cohesity_client.protection_sources
-        #Add default org
         self.source_list = self.protection_sources.list_protection_sources(environments = vm_env)
-        #Add tenants
-        if len(tenant_list) > 0:
-            for tenants in tenant_list:
-                self.source_list.extend(self.protection_sources.list_protection_sources(environments = vm_env, tenant_ids = tenants))
-        
+            
         return self.source_list
         
 
@@ -54,6 +68,18 @@ class ProtectionObject(object):
     def get_protection_object(self):
         pass
 
+    def get_v_app_protection_source(self, cohesity_url, source_id, bearer_token):
+            #REST API Headers and auth
+            headers = {"Authorization": "Bearer %s" % bearer_token.access_token}
+            #REST API Url
+            #url = 'https://{cohesity_url}/irisservices/api/v1/public/protectionSources?IncludeSystemVApps=true&includeVMFolders=false&environments=kVMware&includeEntityPermissionInfo=false'.format(cohesity_url=cohesity_url)   
+            url = 'https://{cohesity_url}/irisservices/api/v1/public/protectionSources?excludeTypes=kVCenter&excludeTypes=kFolder&excludeTypes=kDatacenter&excludeTypes=kHostSystem&excludeTypes=kResourcePool&excludeTypes=kVirtualMachine&excludeTypes=kStandaloneHost&excludeTypes=kVirtualApp'.format(cohesity_url=cohesity_url)
+            sources = []
+            #Rest API payload thorugh loop
+            for source in source_id:
+                payload = {"includeVMFolders": True, "includeSystemVApps": True, "id": source}                
+                res = requests.get(url=url, headers=headers, data=json.dumps(payload), verify=False)
+                return res.json()
 class TenantObject(object):
     def get_tenant_ids(self, cohesity_client):
         self.tenant_list = []
@@ -77,29 +103,131 @@ def main():
         pass
 
     #Get all protection jobs
-    
-    protect_object = ProtectionObject()
-    tenant_object =TenantObject()
-    tenant_list = tenant_object.get_tenant_ids(cc)
-    vm_list_source = protect_object.list_vm_protection_source(cc, vm_env_src, tenant_list)
-    
+    cohesity_url = cohesity_client.get_cluster_fqdn()
     
 
+    protect_object = ProtectionObject()
+    tenant_object =TenantObject()
+    #tenant_list = tenant_object.get_tenant_ids(cc)
+    vm_list_source = protect_object.list_vm_protection_source(cc, vm_env_src)
+    objlst =[]
+    for item in vm_list_source:
+        # if item.protection_source.vmware_protection_source.name.__contains__(""):
+        src_id = item.protection_source.vmware_protection_source.id
+        print(dir(src_id))
+        objlst.extend(cc.protection_sources.get_protection_sources_objects())
+    print(objlst)
+    for obj in objlst:
+        print(obj.vmware_protection_source.mtype)
+    bearer_token = cohesity_client.get_bearer_token(cc)
+
+
+    org_name = "SEC"
     #Get source ID
     source_id = protect_object.get_source_id(vm_list_source)
+    #print(source_id)
+    vapp_list = protect_object.get_v_app_protection_source(cohesity_url, source_id, bearer_token)
+
+    
+    # print(dir(vapp_list))
+    org_list = []
+    for app in vapp_list:
+        if 'nodes' in app:
+            orgs = [o for o in app['nodes'] if o['protectionSource']['vmWareProtectionSource']['type'] == 'kOrganizaation']
+        for org in orgs:
+            org_temp = org['protectionSource']['name']
+            print(org['protectionSource']['name'])
+            org_list.append(org['protectionSource']['name'])
+    vapp_temp = []
+    for vdc in org_list:
+        if 'nodes' in app:
+            vdcs = [o for o in vdc['nodes'] if o['protectionSource']['vmWareProtectionSource']['type'] == 'kVDC']
+        for vapp in vapp_temp:
+            print(vapp['protectionSource']['name'])
+
+
+    # for k, v in org.items():
+    #      if "nodes" in k:
+    #         for item in v:
+    #             for k1, v1 in item.items():
+    #                 if "protectionSource" in k1:
+    #                     for k2, v2 in v1.items():
+    #                         if k2.__contains__("vmWareProtectionSource"):
+    #                             for k3, v3 in v2.items():
+    #                                 if k3.__contains__("type") and v3 == "kOrganization":
+    #                                     print(v3)
+    #                                 if k3.__contains__("name") and v3 == org_name:
+    #                                     print(v3)
+    #                                 #     for k4, v4 in v3.items():
+    #                                 #         print(k4, "->", v4)
+
+
+    # vapp_template = vapp_list[0]
+    # for k, v in org.items():
+    #      if "nodes" in k:
+    #         for item in v:
+    #             for k1, v1 in item.items():
+    #                 if "nodes" in k1:
+    #                     # for item1 in v1.items():
+    #                         # for k2, v2 in v1.items():
+                            # print(k1, "")
+                #     if "nodes" in k1:
+                #             for item1 in v1:
+                #                 print("The key is {key} and the value is {value}".format(key = k1,value = item1))
+                            #print("The key is {key} and the value is {value}".format(key=k1,value=v1))                   
+                   # print(k1["protectionSource"])
+
+    org1 = vapp_list[0]
+
+    # for k, v in org1.items():
+    #     print("The key is {key} and the value is {value}".format(key=k,value=v))
+    # for k, v in org1.items():
+    #     print(k, '->', type(v))
+    #     print(k['protectionSource'])
+
+    #print(org)
+    # print(type(vapp_list))
+    # encode = json.dumps(vapp_list, indent=1)
+    # if encode.
+    # print(encode)
+    # 
+        #  for k, v in vapp.items():
+        #      for item in v:
+        #          if item.__contains__("nodes"):
+        #              for k1,v1 in item.items():
+        #                  print(k1)
+        #                  if k1.__contains__('nodes') and type(k1) is list:
+        #                      print(k1, '->', type(v1), v1)
+        
+    #print(type(vapp_list.json()))
+    # for k, v in vapp_list.items():
+    #     for k1 in v1 in v.items():
+    #         print(k1)
+    # for app in vapp_list:
+    #     for k, v in app.items():
+            
+    #     #     #if (k["protectionSource"]["vmWareProtectionSource"]["type"]) == "kVirtualApp":
+    #         for item in v:
+    #             print(item['type'])
+        # print(app['protectionSource'])
+            
+                # print(app["protectionSource"]["vmWareProtectionSource"]["name"])
+                
+    
     
     # for source in vm_list_source:
     #     print(dir(source.protection_sources))
 
-    for source in source_id:
-        # result = cc.protection_sources.get_protection_sources_objects(object_ids = source.protection_source.id)
-        result = cc.protection_sources.get_protection_sources_objects()
-        for  item in result:
-    # #print(item.name)
-    #     for sources in source_id:
-    #         # print(sources)
-            if  item.parent_id == source and item.name.__contains__("CAT"):
-                print(item.name)
+    # for source in source_id:
+    #     # result = cc.protection_sources.get_protection_sources_objects(object_ids = source.protection_source.id)
+    #     result = cc.protection_sources.get_protection_sources_objects(object_ids=source)
+    #     for  item in result:
+    # # #print(item.name)
+    # #     for sources in source_id:
+    # #         # print(sources)
+    #         #if  item.parent_id == source:# and "CAT" in result:
+    #         #if item.name.__contains__("CAT"):
+    #         print(item.vmware_protection_source.vcloud_director_info)
 
      
     #print(tenant_list)
