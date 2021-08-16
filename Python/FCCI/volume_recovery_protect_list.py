@@ -8,6 +8,7 @@ from cohesity_management_sdk.models.environment_list_application_servers_enum im
 from cohesity_management_sdk.models.environment_list_protected_objects_enum import EnvironmentListProtectedObjectsEnum as envobj
 from cohesity_management_sdk.models.protocol_access_enum import ProtocolAccessEnum
 from cohesity_management_sdk.models.recover_task_request import RecoverTaskRequest
+from cohesity_management_sdk.models.update_view_param import UpdateViewParam
 from cohesity_management_sdk.models.restore_object_details import RestoreObjectDetails
 from cohesity_management_sdk.models.update_view_param import UpdateViewParam
 from cohesity_management_sdk.models.protection_job_request_body import ProtectionJobRequestBody
@@ -91,6 +92,16 @@ class ViewObject(object):
         
         self.csv_file["ViewID"] = view_id
         return self.csv_file
+    
+    def set_view_params(self, cohesity_client, csv_file):
+        self.csv_file = csv_file
+
+        for i, j in csv_file.iterrows():
+            body = UpdateViewParam()
+            body.enable_smb_view_discovery = True
+            cohesity_client.views.update_view_by_name(name=j.Name, body=body)
+    
+    
 class ProtectedObjects(object):       
     def get_protection_jobs(self, cohesity_client, csv_file):
         job_id = []
@@ -153,10 +164,14 @@ class ProtectedObjects(object):
         protect_view_id = []
         #Rest API payload thorugh loop
         for i, j in csv_file.iterrows():
-            payload = {"name": j.Name,"policyId": policy_id,"priority": "kMedium","storageDomainId": storage_domain_id,"startTime": {"hour": new_date.hour,"minute": new_date.minute,"timeZone": timezone}, "environment": "kView", "viewParams": {"objects": [{"id": j.ViewID, "name": j.Name}],"replicationParams": {"viewNameConfigList": [{"sourceViewId": j.ViewID,"useSameViewName": True}]},"indexingPolicy": {"enableIndexing": True,"includePaths": ["/"]}}}
+            payload = {"name": j.Name,"policyId": policy_id,"priority": "kMedium","storageDomainId": storage_domain_id, \
+                "startTime": {"hour": new_date.hour,"minute": new_date.minute,"timeZone": timezone}, "environment": "kView", \
+                    "viewParams": {"objects": [{"id": j.ViewID, "name": j.Name}],"replicationParams": {"viewNameConfigList": [{"sourceViewId": j.ViewID,"useSameViewName": True}]}, \
+                        "indexingPolicy": {"enableIndexing": True,"includePaths": ["/"]}}}
             
             req = requests.post(url=url, data=json.dumps(payload), headers=headers, verify=False)
             print("The View {name} has been protected".format(name=j.Name))
+            
                            
         
 #CSV Import Class
@@ -234,6 +249,9 @@ def main():
     #Get View IDs
     view_object = ViewObject()
     view_id = view_object.get_view_id(cc, csv_verified_file)
+    #Update View Objects
+    view_object.set_view_params(cc, csv_verified_file)
+    
     view_protection_job = protected_object.create_view_protection_job(cohesity_url, view_id, cc, bearer_token, policy_id, storage_domain_id)
     
     
