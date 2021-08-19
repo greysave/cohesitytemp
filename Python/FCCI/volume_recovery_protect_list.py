@@ -79,7 +79,11 @@ class ViewObject(object):
         self.csv_file = csv_file
         #get list of names from csv
         for i, j in self.csv_file.iterrows():
-             names.append(j.Name)
+            name = j.Name
+            #remove the \ and before
+            if name.__contains__('\\'):
+                name = re.sub(r'.*\\', '', j.Name)
+            names.append(name)
         #Create Views  object  
         self.views = cohesity_client.views
         #append list of view names
@@ -96,10 +100,14 @@ class ViewObject(object):
         self.csv_file = csv_file
         #Update view parameters
         for i, j in csv_file.iterrows():
+            name = j.Name
+            #remove the \ and before
+            if name.__contains__('\\'):
+                name = re.sub(r'.*\\', '', j.Name)
             body = UpdateViewParam()
             body.enable_smb_view_discovery = True
-            cohesity_client.views.update_view_by_name(name=j.Name, body=body)
-            print("The View {name} has been set to SMB browsable".format(name=j.Name))
+            cohesity_client.views.update_view_by_name(name=name, body=body)
+            print("The View {name} has been set to SMB browsable".format(name=name))
     
     
 class ProtectedObjects(object):
@@ -137,24 +145,24 @@ class ProtectedObjects(object):
     
     def recover_nas_list(self, cohesity_client, csv_file):
         self.csv_file = csv_file
-              
+        #Iterate through CSV  
         for i, j in csv_file.iterrows():
             #Create Recovery Task
             name = j.Name
             #remove the \ and before
             if name.__contains__('\\'):
                 name = re.sub(r'.*\\', '', j.Name)
-
+            #recovry body payload creation
             body = RecoverTaskRequest()
             body.mtype = 'kMountFileVolume'
-            body.view_name = j.Name
+            body.view_name = name
             body.objects = []
             body.objects.append(RestoreObjectDetails())
             body.name = "Recover-{name}".format(name = name)
             body.objects[0].job_id = j.JobID
             body.restore_view_parameters = UpdateViewParam()
             body.restore_view_parameters.protocol_access = ProtocolAccessEnum.KSMBONLY
- 
+            #Recovry job initiation
             cohesity_client.restore_tasks.create_recover_task(body=body)
             print("The generic nas {Hostname}\\{Name} has been recovered".format(Hostname = j.Hostname, Name = j.Name))
             
@@ -177,8 +185,12 @@ class ProtectedObjects(object):
         protect_view_id = []
         #Rest API payload thorugh loop
         for i, j in csv_file.iterrows():
+            name = j.Name
+            #remove the \ and before
+            if name.__contains__('\\'):
+                name = re.sub(r'.*\\', '', j.Name)
             payload = {
-                "name": j.Name,
+                "name": name,
                 "policyId": policy_id,
                 "priority": "kMedium",
                 "storageDomainId": storage_domain_id,
@@ -191,7 +203,7 @@ class ProtectedObjects(object):
                 "viewParams": {
                     "objects": [{
                         "id": j.ViewID,
-                        "name": j.Name
+                        "name": name
                     }],
                     "replicationParams": {
                         "viewNameConfigList": [{
@@ -227,8 +239,11 @@ class CsvImport(object):
     def verify_csv(self, csv_file):
         #Verify that the file is the correct format
         self.csv_file = csv_file
-        if (magic.from_file(self.csv_file, mime=True).__contains__("text/plain") or magic.from_file(self.csv_file, mime=True).__contains__("text/csv")
-            or magic.from_file(self.csv_file).__contains__("ASCII text, with very long lines"))  and self.csv_file.__contains__(".csv".lower()):
+        if (magic.from_file(self.csv_file, mime=True).__contains__("text/plain") \
+            or magic.from_file(self.csv_file, mime=True).__contains__("text/csv")  \
+            or magic.from_file(self.csv_file).__contains__("ASCII text, with very long lines")) \
+            and self.csv_file.__contains__(".csv".lower()):
+            
             return True
         else:
             return False
