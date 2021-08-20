@@ -85,11 +85,9 @@ class ViewObject(object):
             #remove the \ and before
             if name.__contains__('\\'):
                 name = re.sub(r'.*\\', '', j.Name)
-            if name.__contains__("Phoenix"): 
+            if name.__contains__("Phoenix") or name.__contains__("Claims"):
                 name = "admin-"+name
                 
-            if name.__contains__("Claims"):
-                name = "admin-"+name
             names.append(name)
         #Create Views  object  
         self.views = cohesity_client.views
@@ -112,11 +110,9 @@ class ViewObject(object):
             if name.__contains__('\\'):
                 name = re.sub(r'.*\\', '', j.Name)
                 
-            if name.__contains__("Phoenix"): 
+            if name.__contains__("Phoenix") or name.__contains__("Claims"):
                 name = "admin-"+name
                 
-            if name.__contains__("Claims"):
-                name = "admin-"+name
                 
             body = UpdateViewParam()
             body.enable_smb_view_discovery = True
@@ -193,11 +189,9 @@ class ProtectedObjects(object):
             if name.__contains__('\\'):
                 name = re.sub(r'.*\\', '', j.Name)
             
-            if name.__contains__("Phoenix"): 
+            if name.__contains__("Phoenix") or name.__contains__("Claims"):
                 name = "admin-"+name
                 
-            if name.__contains__("Claims"):
-                name = "admin-"+name
             #recovry body payload creation
             body = RecoverTaskRequest()
             body.mtype = 'kMountFileVolume'
@@ -236,11 +230,9 @@ class ProtectedObjects(object):
             if name.__contains__('\\'):
                 name = re.sub(r'.*\\', '', j.Name)
                 
-            if name.__contains__("Phoenix"): 
+            if name.__contains__("Phoenix") or name.__contains__("Claims"):
                 name = "admin-"+name
                 
-            if name.__contains__("Claims"):
-                name = "admin-"+name
                 
             payload = {
                 "name": name,
