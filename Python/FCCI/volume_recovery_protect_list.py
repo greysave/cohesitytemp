@@ -11,6 +11,8 @@ from cohesity_management_sdk.models.recover_task_request import RecoverTaskReque
 from cohesity_management_sdk.models.update_view_param import UpdateViewParam
 from cohesity_management_sdk.models.restore_object_details import RestoreObjectDetails
 from cohesity_management_sdk.models.update_view_param import UpdateViewParam
+from cohesity_management_sdk.models.view_alias import ViewAlias
+from cohesity_management_sdk.models.rename_view_param import RenameViewParam
 from cohesity_management_sdk.models.protection_job_request_body import ProtectionJobRequestBody
 from cohesity_management_sdk.models.environment_enum import EnvironmentEnum as env
 from cohesity_management_sdk.models.run_protection_job_param import RunProtectionJobParam
@@ -83,6 +85,11 @@ class ViewObject(object):
             #remove the \ and before
             if name.__contains__('\\'):
                 name = re.sub(r'.*\\', '', j.Name)
+            if name.__contains__("Phoenix"): 
+                name = "admin-"+name
+                
+            if name.__contains__("Claims"):
+                name = "admin-"+name
             names.append(name)
         #Create Views  object  
         self.views = cohesity_client.views
@@ -104,10 +111,37 @@ class ViewObject(object):
             #remove the \ and before
             if name.__contains__('\\'):
                 name = re.sub(r'.*\\', '', j.Name)
+                
+            if name.__contains__("Phoenix"): 
+                name = "admin-"+name
+                
+            if name.__contains__("Claims"):
+                name = "admin-"+name
+                
             body = UpdateViewParam()
             body.enable_smb_view_discovery = True
             cohesity_client.views.update_view_by_name(name=name, body=body)
             print("The View {name} has been set to SMB browsable".format(name=name))
+            
+    def create_view_alias(self, cohesity_client, alias_csv_file):
+        self.alias_csv_file = alias_csv_file
+        for i, j in self.alias_csv_file.iterrows():
+            name = j.View
+            body = ViewAlias()
+            body.alias_name = j.ShareName
+            body.enable_smb_view_discovery = True
+            body.view_name = j.View
+            body.view_path = j.ViewPath
+            cohesity_client.views.create_view_alias(body=body)
+            print("The alias {share_name} has beeen created on view {view}".format(share_name=j.ShareName, view=j.View))
+            
+    def rename_view(self, cohesity_client, rename_csv_file):
+        self.rename_csv_file = rename_csv_file
+        for i, j in self.rename_csv_file.iterrows():
+            body = RenameViewParam()
+            body.new_view_name = j.NewName
+            cohesity_client.create_rename_view(body, j.Name)
+            print("The view {name} has been renamed to {new_name}".format(name=j.Name, new_name = j.NewName))
     
     
 class ProtectedObjects(object):
@@ -118,23 +152,29 @@ class ProtectedObjects(object):
         self.jobs_list = []
         self.csv_file = csv_file
         #append list of protection job names from csv
+        
         for i, j in self.csv_file.iterrows():
-            names.append(j.Name)
+            new_name = j.Hostname + '-' + j.Name
+            names.append(new_name)
         #create protection object
+        
         self.protection_jobs = cohesity_client.protection_jobs
         #Look for protection job names
         for name in names:
             #Verify protection job
             if name.__contains__('\\'):
                 name = name.replace('\\', '-')
-                
+             
             verified_job = self.protection_jobs.get_protection_jobs(names = name)
+            
             #search verified job
             for item in verified_job:
                 #Append only non-deleted jobs
                 if item.is_deleted == False or item.is_deleted == None:
+                    
                     self.jobs_list.append(item)
         #loop through job list
+        
         for job in self.jobs_list:
             job_id.append(job.id)
         #add jobID column to csv file
@@ -152,6 +192,12 @@ class ProtectedObjects(object):
             #remove the \ and before
             if name.__contains__('\\'):
                 name = re.sub(r'.*\\', '', j.Name)
+            
+            if name.__contains__("Phoenix"): 
+                name = "admin-"+name
+                
+            if name.__contains__("Claims"):
+                name = "admin-"+name
             #recovry body payload creation
             body = RecoverTaskRequest()
             body.mtype = 'kMountFileVolume'
@@ -189,6 +235,13 @@ class ProtectedObjects(object):
             #remove the \ and before
             if name.__contains__('\\'):
                 name = re.sub(r'.*\\', '', j.Name)
+                
+            if name.__contains__("Phoenix"): 
+                name = "admin-"+name
+                
+            if name.__contains__("Claims"):
+                name = "admin-"+name
+                
             payload = {
                 "name": name,
                 "policyId": policy_id,
@@ -238,15 +291,28 @@ class CsvImport(object):
                
     def verify_csv(self, csv_file):
         #Verify that the file is the correct format
+        
         self.csv_file = csv_file
         if (magic.from_file(self.csv_file, mime=True).__contains__("text/plain") \
             or magic.from_file(self.csv_file, mime=True).__contains__("text/csv")  \
             or magic.from_file(self.csv_file).__contains__("ASCII text, with very long lines")) \
             and self.csv_file.__contains__(".csv".lower()):
             
-            return True
+            verified_csv = True
         else:
-            return False
+            verified_csv = False
+        
+        
+        if verified_csv == True:
+            print("The CSV File has been verified")
+            return verified_csv
+            
+        else:
+            print("The CSV failed verifiecation.  Please choose a new CSV file.  Please rerun the program with a valid file.")
+            exit()
+        
+        
+            
             
     def csv_import(self, csv_file):
         #import csv of protection job names and return as alist
@@ -276,37 +342,55 @@ def main():
     storage_domain_id = storage_domain_object.get_storage_domain_id(cc)
    
     #Open CSV File
-    csv = CsvImport()
-    csv_file = csv.open_csv()
+    recover_csv = CsvImport()
+    share_csv = CsvImport()
+    recover_csv_file = recover_csv.open_csv()
+    share_csv_file = share_csv.open_csv()
+    
+    #comment this one out if there are no shares to be renamed due to conflicts
+    # rename_csv_file = csv.open_csv("Please select a list of views that need to be renamed due to conflict")
     
     #Verify CSV File
-    csv_verify = csv.verify_csv(csv_file)
-    if csv.verify_csv(csv_file) == True:
-       print("File Verified")
-    else:
-       print("File Failed Verifiecation please select a different file")
+    recover_csv.verify_csv(recover_csv_file)
+    share_csv.verify_csv(share_csv_file)
+    #comment this out if there is no duplicate list
+    # csv.verify_csv(rename_csv_file)
+    
     
     #import CSV File
-    csv_verified_file = csv.csv_import(csv_file)
+    recover_csv_verified_file = recover_csv.csv_import(recover_csv_file)
+    share_csv_verified_file = share_csv.csv_import(share_csv_file)
+    #print(recover_csv_verified_file)
     
+    #Only for duplicate name comment out when not in use
+    # rename_csv_verified_file = csv.csv_import(share_csv_file)
+        
     #Get Protection Object
     protected_object = ProtectedObjects()
     
     #Get Protection Jobs
-    protection_jobs = protected_object.get_protection_jobs(cc, csv_verified_file)
+    protection_jobs = protected_object.get_protection_jobs(cc, recover_csv_verified_file)
+    
     
     # Recover Protecion Job to a View
     recovery_job = protected_object.recover_nas_list(cc, protection_jobs)
     
     # Get View IDs
     view_object = ViewObject()
-    view_id = view_object.get_view_id(cc, csv_verified_file)
+    view_id = view_object.get_view_id(cc, recover_csv_verified_file)
     
     
     view_protection_job = protected_object.create_view_protection_job(cohesity_url, view_id, cc, bearer_token, policy_id, storage_domain_id)
 
+    #Rename views if relevent.  Comment out when necessary
+    #view_object.rename_view(cc, rename_csv_verified_file)    
+    
     # Update View Objects
-    view_object.set_view_params(cc, csv_verified_file)
+    view_object.set_view_params(cc, recover_csv_verified_file)
+    
+    #Create view alias
+    view_object.create_view_alias(cc, share_csv_verified_file)
+    
     
 #Initate Main Function
 if __name__ == '__main__':
